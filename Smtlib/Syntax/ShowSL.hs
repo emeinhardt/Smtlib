@@ -155,7 +155,7 @@ instance ShowSL Index where
 
 instance ShowSL Identifier where
   showSL (ISymbol str) = str
-  showSL (I_Symbol str is) = "(_ " ++ str ++ " " ++ joinA is  ++ ")"
+  showSL (I_Symbol str is) = "(_ " ++ str ++ " " ++ joinA is ++ ")"
 
 instance ShowSL Sort where
   showSL (SortId iden) = showSL iden
