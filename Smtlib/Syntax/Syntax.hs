@@ -11,6 +11,8 @@ This module contains The syntax to create commands and responses.
 -}
 module Smtlib.Syntax.Syntax where
 
+import qualified Data.Set as Set
+
 {-
    #########################################################################
    #                                                                       #
@@ -18,6 +20,11 @@ module Smtlib.Syntax.Syntax where
    #                                                                       #
    #########################################################################
 -}
+
+reservedWordsSet :: Set.Set String
+reservedWordsSet =  Set.fromList $
+  ["BINARY", "DECIMAL", "HEXADECIMAL", "NUMERAL", "STRING", "_", "!", "as", "let", "exists", "forall", "par"] ++
+  ["set-logic", "set-option", "set-info", "declare-sort", "define-sort", "declare-const", "declare-fun", "declare-fun-rec", "declare-funs-rec", "push", "pop", "reset", "reset-assertions", "assert", "check-sat", "check-sat-assuming", "get-assertions", "get-model", "get-proof", "get-unsat-core", "get-unsat-assumptions", "get-value", "get-assignment", "get-option", "get-info", "echo", "exit"]
 
 
 type Source = [Command]

@@ -151,6 +151,20 @@ case_comment = do
   parse parseTerm "" "(f ; hogehoge\na;bbb\n)" @?=
     Right (TermQualIdentifierT (QIdentifier (ISymbol "f")) [TermQualIdentifier (QIdentifier (ISymbol "a"))])
 
+-- https://github.com/msakai/Smtlib/issues/1
+case_parseSexpr_bug :: Assertion
+case_parseSexpr_bug = do
+  case parse parseSexpr "" src of
+    Left err -> assertFailure (show err)
+    Right _ -> return ()
+  where
+    src =
+      unlines
+      [ "(proof", "(let ((@x35 (monotonicity (rewrite (= (=> p p) true)) (= (not (=> p p)) (not true)))))"
+      , "(let ((@x39 (trans @x35 (rewrite (= (not true) false)) (= (not (=> p p)) false))))"
+      , "(mp (asserted (not (=> p p))) @x39 false)))))"
+      ]
+
 -- ---------------------------------------------------------------------
 
 prop_Command_show :: Property

@@ -78,21 +78,24 @@ strChar = (oneOf $ ['\t','\n','\r'] ++ [c | c <- [toEnum 32 .. toEnum 126], c /=
 
 --parse a Symbol
 symbol :: ParsecT String u Identity String
-symbol = simpleSymbol <|> quotedSymbol
+symbol = symbol' reservedWordsSet
+
+symbol' :: Set.Set String -> ParsecT String u Identity String
+symbol' reserved = simpleSymbol' reserved <|> quotedSymbol
 
 quotedSymbol :: ParsecT String u Identity String
 quotedSymbol = char '|' *> Pc.many (noneOf "|")  <* char '|'
 
 simpleSymbol :: ParsecT String u Identity String
-simpleSymbol = Pc.try $ do
+simpleSymbol = simpleSymbol' reservedWordsSet
+
+simpleSymbol' :: Set.Set String -> ParsecT String u Identity String
+simpleSymbol' reserved = Pc.try $ do
   s <- (letter <|> spcSymb) <:>  sq
   guard $ s `Set.notMember` reserved
   return s
   where
     sq = Pc.many (alphaNum <|> spcSymb)
-    reserved = Set.fromList $
-      ["BINARY", "DECIMAL", "HEXADECIMAL", "NUMERAL", "STRING", "_", "!", "as", "let", "exists", "forall", "par"] ++
-      ["set-logic", "set-option", "set-info", "declare-sort", "define-sort", "declare-const", "declare-fun", "declare-fun-rec", "declare-funs-rec", "push", "pop", "reset", "reset-assertions", "assert", "check-sat", "check-sat-assuming", "get-assertions", "get-model", "get-proof", "get-unsat-core", "get-unsat-assumptions", "get-value", "get-assignment", "get-option", "get-info", "echo", "exit"]
 
 spcSymb :: ParsecT String u Identity Char
 spcSymb = oneOf  "+-/*=%?!.$_~^&<>@"
@@ -415,7 +418,7 @@ parseSexprConstant :: ParsecT String u Identity Sexpr
 parseSexprConstant = liftM SexprSpecConstant parseSpecConstant
 
 parseSexprSymbol :: ParsecT String u Identity Sexpr
-parseSexprSymbol = liftM SexprSymbol symbol
+parseSexprSymbol = liftM SexprSymbol (symbol' Set.empty)
 
 parseSexprKeyword :: ParsecT String u Identity Sexpr
 parseSexprKeyword = liftM SexprKeyword keyword

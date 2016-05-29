@@ -27,17 +27,16 @@ joinNs :: [Int] -> String
 joinNs = unwords.fmap show
 
 showSymbol :: String -> String
-showSymbol s
+showSymbol = showSymbol' reservedWordsSet
+
+showSymbol' :: Set.Set String -> String -> String
+showSymbol' reserved s
   | c:_ <- s, isDigit c = quoted
   | all p s && s `Set.notMember` reserved = s
   | otherwise = quoted
   where
     quoted = "|" ++ s ++ "|"
     p c = (isAscii c && isAlpha c) || isDigit c || c `elem` "~!@$%^&*_-+=<>.?/"
-    reserved = Set.fromList $
-      ["BINARY", "DECIMAL", "HEXADECIMAL", "NUMERAL", "STRING", "_", "!", "as", "let", "exists", "forall", "par"] ++
-      ["set-logic", "set-option", "set-info", "declare-sort", "define-sort", "declare-const", "declare-fun", "declare-fun-rec", "declare-funs-rec", "push", "pop", "reset", "reset-assertions", "assert", "check-sat", "check-sat-assuming", "get-assertions", "get-model", "get-proof", "get-unsat-core", "get-unsat-assumptions", "get-value", "get-assignment", "get-option", "get-info", "echo", "exit"]
-
 
 class ShowSL a where
   showSL :: a -> String
@@ -185,7 +184,7 @@ instance ShowSL SpecConstant where
 
 instance ShowSL Sexpr where
   showSL (SexprSpecConstant sc) = showSL sc
-  showSL (SexprSymbol str) = showSymbol str
+  showSL (SexprSymbol str) = showSymbol' Set.empty str
   showSL (SexprKeyword str) = str
   showSL (SexprSxp srps) = "(" ++ joinA srps ++ ")"
 
